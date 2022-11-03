@@ -8,13 +8,13 @@
 import UIKit
 import CoreData
 class HomeViewController: UIViewController{
- //MARK: - Vars
+    //MARK: - Vars
     // master array
-//     var selectedIndexPath = IndexPath(item: 0, section: 0)
-     var tempArray: [NSManagedObject] = []
-//     var IncomeTempArray: [NSManagedObject] = []
-     var homeViewModel : HomeViewModel?
-
+    //     var selectedIndexPath = IndexPath(item: 0, section: 0)
+    var tempArray: [NSManagedObject] = []
+    //     var IncomeTempArray: [NSManagedObject] = []
+    var homeViewModel : HomeViewModel?
+    
     //MARK: - IBOutlets
     @IBOutlet weak var tableView: UITableView!{
         didSet{
@@ -27,41 +27,50 @@ class HomeViewController: UIViewController{
     //MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-          homeViewModel = HomeViewModel()
+        homeViewModel = HomeViewModel()
         //we active this function one time only in the first app launch
-        // homeViewModel?.addUsersToCoreData()
+        if !isAppAlreadyLaunchedOnce() {
+            homeViewModel?.addUsersToCoreData()
+        }
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         homeViewModel?.callFuncToFetchUsersFromCoreData()
-      if let users = homeViewModel?.usersFromCoreData{
-          tempArray = users
-      }
+        if let users = homeViewModel?.usersFromCoreData{
+            tempArray = users
+        }
         tableView.reloadData()
     }
-    //MARK: - IBActions
     
-    
-    
-//MARK: - Helper Fuctions
-  
+    //MARK: - Helper Functions
+    func isAppAlreadyLaunchedOnce() -> Bool {
+        let defaults = UserDefaults.standard
+        if let _ = defaults.string(forKey: "isAppAlreadyLaunchedOnce") {
+            print("App already launched")
+            return true
+        } else {
+            defaults.set(true, forKey: "isAppAlreadyLaunchedOnce")
+            print("App launched first time")
+            return false
+        }
+    }
 }
 extension HomeViewController : UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       // let transactionsNum = homeViewModel?.transactionsFromCoreData.count
-      print("DEBUG:\(tempArray.count)")
-       // return transactionsNum ?? 0
+        // let transactionsNum = homeViewModel?.transactionsFromCoreData.count
+        print("DEBUG:\(tempArray.count)")
+        // return transactionsNum ?? 0
         return tempArray.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: CellsIDs.userTableViewCell, for: indexPath) as! UserTableViewCell
-       // cell.budgetNameLabel?.text = "mmmmmmm"
-       // let budget = TempDataBase().expenses_arr[indexPath.row]
-      //let budget = tempArray[indexPath.row]
-         let user  = tempArray[indexPath.row]
-         cell.setupCell(user: user)
-      //  cell.setupCell(transaction: budget)
+        // cell.budgetNameLabel?.text = "mmmmmmm"
+        // let budget = TempDataBase().expenses_arr[indexPath.row]
+        //let budget = tempArray[indexPath.row]
+        let user  = tempArray[indexPath.row]
+        cell.setupCell(user: user)
+        //  cell.setupCell(transaction: budget)
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
